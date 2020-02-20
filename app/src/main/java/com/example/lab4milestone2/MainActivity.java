@@ -1,7 +1,9 @@
 package com.example.lab4milestone2;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Context;
@@ -11,6 +13,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,18 +49,49 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        startListening();
+
         if (Build.VERSION.SDK_INT >= 23 &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
 
-        }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        } else {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-        if (location != null) {
-            //code here
+            if (location != null) {
+                //code here
+            }
         }
+    }
+
+    public void startListening() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startListening();
+        }
+    }
+
+    public void updateLocationInfo(Location location) {
+        Log.i("LocationInfo", location.toString());
+        TextView latTextView = findViewById(R.id.latTextView);
+        TextView longTextView = findViewById(R.id.longTextView);
+        TextView altTextView = findViewById(R.id.altTextView);
+        TextView accTextView = findViewById(R.id.accTextView);
+
+        latTextView.setText("Latitude: " + location.getLatitude());
+        longTextView.setText("Longitude: " + location.getLongitude());
+        altTextView.setText("Altitude: " + location.getAltitude());
+        accTextView.setText("Accuracy: " + location.getAccuracy());
 
     }
 }
